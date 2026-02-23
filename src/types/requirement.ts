@@ -8,6 +8,16 @@ export interface AgentInfo {
   status: AgentStatus;
 }
 
+export interface ActivityEntry {
+  id: string;
+  timestamp: string;
+  reqId: string;
+  reqTitle: string;
+  agentName: string;
+  fromStatus: AgentStatus;
+  toStatus: AgentStatus;
+}
+
 export interface Requirement {
   id: string;
   title: string;

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Requirement, AGENT_TEMPLATES, AgentStatus } from "@/types/requirement";
+import { useState, useCallback, useRef } from "react";
+import { Requirement, AGENT_TEMPLATES, AgentStatus, ActivityEntry } from "@/types/requirement";
 
 const createId = () => Math.random().toString(36).slice(2, 10);
 
@@ -55,37 +55,140 @@ const INITIAL: Requirement[] = [
     createdAt: "2026-02-23",
     agents: createAgents(),
   },
+  {
+    id: createId(),
+    title: "API Rate Limiter",
+    description: "Implement rate limiting middleware with Redis caching",
+    priority: "low",
+    createdAt: "2026-02-19",
+    agents: AGENT_TEMPLATES.map((t, i) => ({
+      ...t,
+      id: createId(),
+      status: (["completed", "completed", "completed", "completed", "in-progress", "pending"] as AgentStatus[])[i],
+    })),
+  },
 ];
 
 export function useRequirements() {
   const [requirements, setRequirements] = useState<Requirement[]>(INITIAL);
+  const [activityLog, setActivityLog] = useState<ActivityEntry[]>([]);
+  const autoProgressTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
-  const addRequirement = (title: string, description: string, priority: Requirement["priority"]) => {
-    setRequirements((prev) => [
-      {
-        id: createId(),
-        title,
-        description,
-        priority,
-        createdAt: new Date().toISOString().split("T")[0],
-        agents: createAgents(),
-      },
-      ...prev,
-    ]);
+  const addActivity = useCallback(
+    (reqId: string, reqTitle: string, agentName: string, fromStatus: AgentStatus, toStatus: AgentStatus) => {
+      setActivityLog((prev) => [
+        {
+          id: createId(),
+          timestamp: new Date().toISOString(),
+          reqId,
+          reqTitle,
+          agentName,
+          fromStatus,
+          toStatus,
+        },
+        ...prev.slice(0, 49), // keep last 50
+      ]);
+    },
+    []
+  );
+
+  const addRequirement = useCallback(
+    (title: string, description: string, priority: Requirement["priority"]) => {
+      setRequirements((prev) => [
+        {
+          id: createId(),
+          title,
+          description,
+          priority,
+          createdAt: new Date().toISOString().split("T")[0],
+          agents: createAgents(),
+        },
+        ...prev,
+      ]);
+    },
+    []
+  );
+
+  const updateAgentStatus = useCallback(
+    (reqId: string, agentId: string, status: AgentStatus) => {
+      setRequirements((prev) => {
+        const req = prev.find((r) => r.id === reqId);
+        const agent = req?.agents.find((a) => a.id === agentId);
+        if (req && agent) {
+          addActivity(reqId, req.title, agent.name, agent.status, status);
+        }
+        return prev.map((r) =>
+          r.id === reqId
+            ? { ...r, agents: r.agents.map((a) => (a.id === agentId ? { ...a, status } : a)) }
+            : r
+        );
+      });
+    },
+    [addActivity]
+  );
+
+  const startAutoProgress = useCallback(
+    (reqId: string) => {
+      // Cancel existing timer
+      const existing = autoProgressTimers.current.get(reqId);
+      if (existing) clearInterval(existing);
+
+      const tick = () => {
+        setRequirements((prev) => {
+          const req = prev.find((r) => r.id === reqId);
+          if (!req) return prev;
+
+          // Find first non-completed agent
+          const nextAgent = req.agents.find(
+            (a) => a.status === "pending" || a.status === "in-progress"
+          );
+          if (!nextAgent) {
+            // All done, clear interval
+            const timer = autoProgressTimers.current.get(reqId);
+            if (timer) clearInterval(timer);
+            autoProgressTimers.current.delete(reqId);
+            return prev;
+          }
+
+          const newStatus: AgentStatus =
+            nextAgent.status === "pending" ? "in-progress" : "completed";
+          addActivity(reqId, req.title, nextAgent.name, nextAgent.status, newStatus);
+
+          return prev.map((r) =>
+            r.id === reqId
+              ? {
+                  ...r,
+                  agents: r.agents.map((a) =>
+                    a.id === nextAgent.id ? { ...a, status: newStatus } : a
+                  ),
+                }
+              : r
+          );
+        });
+      };
+
+      const timer = setInterval(tick, 1500);
+      autoProgressTimers.current.set(reqId, timer);
+      tick(); // Start immediately
+    },
+    [addActivity]
+  );
+
+  const deleteRequirement = useCallback((reqId: string) => {
+    setRequirements((prev) => prev.filter((r) => r.id !== reqId));
+    const timer = autoProgressTimers.current.get(reqId);
+    if (timer) {
+      clearInterval(timer);
+      autoProgressTimers.current.delete(reqId);
+    }
+  }, []);
+
+  return {
+    requirements,
+    activityLog,
+    addRequirement,
+    updateAgentStatus,
+    startAutoProgress,
+    deleteRequirement,
   };
-
-  const updateAgentStatus = (reqId: string, agentId: string, status: AgentStatus) => {
-    setRequirements((prev) =>
-      prev.map((r) =>
-        r.id === reqId
-          ? {
-              ...r,
-              agents: r.agents.map((a) => (a.id === agentId ? { ...a, status } : a)),
-            }
-          : r
-      )
-    );
-  };
-
-  return { requirements, addRequirement, updateAgentStatus };
 }
