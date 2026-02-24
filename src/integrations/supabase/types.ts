@@ -14,16 +14,226 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          auth_id: string
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          auth_id: string
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          auth_id?: string
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      project_artifacts: {
+        Row: {
+          file_type: string | null
+          file_url: string | null
+          id: string
+          name: string
+          project_id: string
+          storage_path: string
+          uploaded_at: string
+        }
+        Insert: {
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          name: string
+          project_id: string
+          storage_path: string
+          uploaded_at?: string
+        }
+        Update: {
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          name?: string
+          project_id?: string
+          storage_path?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_artifacts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_stakeholders: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          project_id: string
+          role: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          project_id: string
+          role?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          project_id?: string
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_stakeholders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          owner_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      requirement_agents: {
+        Row: {
+          agent_icon: string
+          agent_name: string
+          agent_role: string
+          id: string
+          requirement_id: string
+          status: Database["public"]["Enums"]["agent_status"]
+          updated_at: string
+        }
+        Insert: {
+          agent_icon?: string
+          agent_name: string
+          agent_role: string
+          id?: string
+          requirement_id: string
+          status?: Database["public"]["Enums"]["agent_status"]
+          updated_at?: string
+        }
+        Update: {
+          agent_icon?: string
+          agent_name?: string
+          agent_role?: string
+          id?: string
+          requirement_id?: string
+          status?: Database["public"]["Enums"]["agent_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requirement_agents_requirement_id_fkey"
+            columns: ["requirement_id"]
+            isOneToOne: false
+            referencedRelation: "requirements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requirements: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          priority: Database["public"]["Enums"]["requirement_priority"]
+          project_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["requirement_priority"]
+          project_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["requirement_priority"]
+          project_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requirements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_access_requirement: {
+        Args: { requirement_id_input: string }
+        Returns: boolean
+      }
+      is_project_owner: { Args: { project_id_input: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      agent_status: "pending" | "in-progress" | "completed" | "failed"
+      requirement_priority: "low" | "medium" | "high" | "critical"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +360,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      agent_status: ["pending", "in-progress", "completed", "failed"],
+      requirement_priority: ["low", "medium", "high", "critical"],
+    },
   },
 } as const
