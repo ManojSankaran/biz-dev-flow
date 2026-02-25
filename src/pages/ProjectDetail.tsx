@@ -11,13 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RequirementCard } from "@/components/RequirementCard";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { SearchFilterBar, PriorityFilter, StatusFilter, SortOption } from "@/components/SearchFilterBar";
+import { NotificationBell } from "@/components/NotificationBell";
 import {
   Activity, ArrowLeft, Users, FileUp, LayoutList, BarChart3, Plus, Loader2, Trash2,
   Upload, File, Image, FileText, Sparkles, UserPlus
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import { Requirement, AgentInfo, AgentStatus, AGENT_TEMPLATES } from "@/types/requirement";
+import { Requirement, AgentInfo, AgentStatus, AGENT_TEMPLATES, WorkflowStatus } from "@/types/requirement";
 
 const PRIORITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
 
@@ -50,6 +51,7 @@ interface DbRequirement {
   description: string | null;
   priority: string;
   created_at: string;
+  workflow_status: string;
 }
 
 interface DbAgent {
@@ -130,6 +132,7 @@ const ProjectDetail = () => {
         description: r.description || "",
         priority: r.priority as Requirement["priority"],
         createdAt: r.created_at.split("T")[0],
+        workflowStatus: (r.workflow_status || "pending_ba_approval") as WorkflowStatus,
         agents: (agentsByReq.get(r.id) || []).map((a) => ({
           id: a.id,
           name: a.agent_name,
@@ -304,6 +307,7 @@ const ProjectDetail = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <Button
               onClick={generateRequirements}
               disabled={generating || artifacts.length === 0}
@@ -468,6 +472,7 @@ const ProjectDetail = () => {
                       onStatusChange={(agentId, status) => updateAgentStatus(agentId, status)}
                       onAutoProgress={() => {}}
                       onDelete={() => deleteRequirement(req.id)}
+                      onApproval={fetchAll}
                     />
                   ))}
                 </div>

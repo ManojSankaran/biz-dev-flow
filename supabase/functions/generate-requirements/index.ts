@@ -155,6 +155,14 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
     const extracted = JSON.parse(toolCall.function.arguments);
     const reqs = extracted.requirements || [];
 
+    // Find BA stakeholder
+    const { data: baStakeholders } = await supabase
+      .from("project_stakeholders")
+      .select("name")
+      .eq("project_id", projectId)
+      .ilike("role", "%business analyst%");
+    const baName = baStakeholders?.[0]?.name || "Business Analyst";
+
     let count = 0;
     for (const req of reqs) {
       const { data: newReq, error: insertErr } = await supabase
@@ -164,6 +172,7 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
           title: req.title,
           description: req.description,
           priority: req.priority,
+          workflow_status: "pending_ba_approval",
         })
         .select()
         .single();
@@ -175,10 +184,21 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
         agent_name: t.name,
         agent_role: t.role,
         agent_icon: t.icon,
-        status: "pending",
+        status: t.name === "Business Analyst" ? "in-progress" : "pending",
       }));
 
       await supabase.from("requirement_agents").insert(agents);
+
+      // Create notification for BA approval
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        project_id: projectId,
+        requirement_id: newReq.id,
+        type: "ba_approval_needed",
+        title: `Approval needed: ${req.title}`,
+        message: `New requirement needs ${baName}'s review before proceeding.`,
+      });
+
       count++;
     }
 
