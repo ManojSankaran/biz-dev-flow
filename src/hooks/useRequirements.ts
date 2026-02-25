@@ -17,6 +17,7 @@ const INITIAL: Requirement[] = [
     description: "Implement login, signup, password reset with OAuth2 integration",
     priority: "critical",
     createdAt: "2026-02-20",
+    workflowStatus: "in_development",
     agents: AGENT_TEMPLATES.map((t, i) => ({
       ...t,
       id: createId(),
@@ -29,6 +30,7 @@ const INITIAL: Requirement[] = [
     description: "Real-time metrics dashboard with charts and KPI tracking",
     priority: "high",
     createdAt: "2026-02-21",
+    workflowStatus: "pending_architect_approval",
     agents: AGENT_TEMPLATES.map((t, i) => ({
       ...t,
       id: createId(),
@@ -41,6 +43,7 @@ const INITIAL: Requirement[] = [
     description: "Stripe and PayPal integration for subscription billing",
     priority: "high",
     createdAt: "2026-02-22",
+    workflowStatus: "completed",
     agents: AGENT_TEMPLATES.map((t, i) => ({
       ...t,
       id: createId(),
@@ -53,6 +56,7 @@ const INITIAL: Requirement[] = [
     description: "Email, SMS, and push notification service",
     priority: "medium",
     createdAt: "2026-02-23",
+    workflowStatus: "pending_ba_approval",
     agents: createAgents(),
   },
   {
@@ -61,6 +65,7 @@ const INITIAL: Requirement[] = [
     description: "Implement rate limiting middleware with Redis caching",
     priority: "low",
     createdAt: "2026-02-19",
+    workflowStatus: "in_development",
     agents: AGENT_TEMPLATES.map((t, i) => ({
       ...t,
       id: createId(),
@@ -101,6 +106,7 @@ export function useRequirements() {
           description,
           priority,
           createdAt: new Date().toISOString().split("T")[0],
+          workflowStatus: "pending_ba_approval",
           agents: createAgents(),
         },
         ...prev,

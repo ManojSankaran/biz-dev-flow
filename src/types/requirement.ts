@@ -18,6 +18,15 @@ export interface ActivityEntry {
   toStatus: AgentStatus;
 }
 
+export type WorkflowStatus =
+  | "pending_ba_approval"
+  | "ba_approved"
+  | "generating_design"
+  | "pending_architect_approval"
+  | "architect_approved"
+  | "in_development"
+  | "completed";
+
 export interface Requirement {
   id: string;
   title: string;
@@ -25,6 +34,7 @@ export interface Requirement {
   priority: "low" | "medium" | "high" | "critical";
   createdAt: string;
   agents: AgentInfo[];
+  workflowStatus: WorkflowStatus;
 }
 
 export const AGENT_TEMPLATES: Omit<AgentInfo, "id" | "status">[] = [
