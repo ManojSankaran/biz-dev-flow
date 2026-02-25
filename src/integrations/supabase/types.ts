@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string | null
+          project_id: string
+          requirement_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          project_id: string
+          requirement_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          project_id?: string
+          requirement_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_requirement_id_fkey"
+            columns: ["requirement_id"]
+            isOneToOne: false
+            referencedRelation: "requirements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           auth_id: string
@@ -191,6 +242,7 @@ export type Database = {
           project_id: string
           title: string
           updated_at: string
+          workflow_status: Database["public"]["Enums"]["workflow_status"]
         }
         Insert: {
           created_at?: string
@@ -200,6 +252,7 @@ export type Database = {
           project_id: string
           title: string
           updated_at?: string
+          workflow_status?: Database["public"]["Enums"]["workflow_status"]
         }
         Update: {
           created_at?: string
@@ -209,6 +262,7 @@ export type Database = {
           project_id?: string
           title?: string
           updated_at?: string
+          workflow_status?: Database["public"]["Enums"]["workflow_status"]
         }
         Relationships: [
           {
@@ -216,6 +270,38 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technical_designs: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          requirement_id: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          requirement_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          requirement_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_designs_requirement_id_fkey"
+            columns: ["requirement_id"]
+            isOneToOne: false
+            referencedRelation: "requirements"
             referencedColumns: ["id"]
           },
         ]
@@ -234,6 +320,14 @@ export type Database = {
     Enums: {
       agent_status: "pending" | "in-progress" | "completed" | "failed"
       requirement_priority: "low" | "medium" | "high" | "critical"
+      workflow_status:
+        | "pending_ba_approval"
+        | "ba_approved"
+        | "generating_design"
+        | "pending_architect_approval"
+        | "architect_approved"
+        | "in_development"
+        | "completed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -363,6 +457,15 @@ export const Constants = {
     Enums: {
       agent_status: ["pending", "in-progress", "completed", "failed"],
       requirement_priority: ["low", "medium", "high", "critical"],
+      workflow_status: [
+        "pending_ba_approval",
+        "ba_approved",
+        "generating_design",
+        "pending_architect_approval",
+        "architect_approved",
+        "in_development",
+        "completed",
+      ],
     },
   },
 } as const
