@@ -8,6 +8,15 @@ export interface AgentInfo {
   status: AgentStatus;
 }
 
+export interface AgentOutput {
+  id: string;
+  requirementId: string;
+  agentName: string;
+  content: string;
+  outputType: string;
+  createdAt: string;
+}
+
 export interface ActivityEntry {
   id: string;
   timestamp: string;
@@ -37,11 +46,25 @@ export interface Requirement {
   workflowStatus: WorkflowStatus;
 }
 
+// New agent order: BA → Architect → Developer → Admin → QA → DevOps
 export const AGENT_TEMPLATES: Omit<AgentInfo, "id" | "status">[] = [
   { name: "Business Analyst", role: "Requirements Analysis", icon: "FileSearch" },
   { name: "Technical Architect", role: "System Design", icon: "Blocks" },
-  { name: "Admin Agent", role: "Access & Config", icon: "Shield" },
   { name: "Developer Agent", role: "Implementation", icon: "Code" },
+  { name: "Admin Agent", role: "Access & Config", icon: "Shield" },
   { name: "QA Agent", role: "Testing & Validation", icon: "TestTube2" },
   { name: "DevOps Agent", role: "CI/CD & Deployment", icon: "GitBranch" },
 ];
+
+// Agents that require human approval before proceeding
+export const APPROVAL_AGENTS = ["Business Analyst", "Technical Architect"];
+
+// Labels for each agent's output preview
+export const AGENT_OUTPUT_LABELS: Record<string, string> = {
+  "Business Analyst": "Detailed Requirements",
+  "Technical Architect": "Technical Design",
+  "Developer Agent": "Generated Code",
+  "Admin Agent": "Access & Config Metadata",
+  "QA Agent": "Test Cases & Validation",
+  "DevOps Agent": "Deployment Pipeline",
+};
