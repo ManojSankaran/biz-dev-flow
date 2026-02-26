@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_outputs: {
+        Row: {
+          agent_name: string
+          content: string
+          created_at: string
+          id: string
+          output_type: string
+          requirement_id: string
+          updated_at: string
+        }
+        Insert: {
+          agent_name: string
+          content: string
+          created_at?: string
+          id?: string
+          output_type?: string
+          requirement_id: string
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          output_type?: string
+          requirement_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_outputs_requirement_id_fkey"
+            columns: ["requirement_id"]
+            isOneToOne: false
+            referencedRelation: "requirements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string

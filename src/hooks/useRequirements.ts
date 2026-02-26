@@ -91,7 +91,7 @@ export function useRequirements() {
           fromStatus,
           toStatus,
         },
-        ...prev.slice(0, 49), // keep last 50
+        ...prev.slice(0, 49),
       ]);
     },
     []
@@ -135,7 +135,6 @@ export function useRequirements() {
 
   const startAutoProgress = useCallback(
     (reqId: string) => {
-      // Cancel existing timer
       const existing = autoProgressTimers.current.get(reqId);
       if (existing) clearInterval(existing);
 
@@ -144,12 +143,10 @@ export function useRequirements() {
           const req = prev.find((r) => r.id === reqId);
           if (!req) return prev;
 
-          // Find first non-completed agent
           const nextAgent = req.agents.find(
             (a) => a.status === "pending" || a.status === "in-progress"
           );
           if (!nextAgent) {
-            // All done, clear interval
             const timer = autoProgressTimers.current.get(reqId);
             if (timer) clearInterval(timer);
             autoProgressTimers.current.delete(reqId);
@@ -175,7 +172,7 @@ export function useRequirements() {
 
       const timer = setInterval(tick, 1500);
       autoProgressTimers.current.set(reqId, timer);
-      tick(); // Start immediately
+      tick();
     },
     [addActivity]
   );

@@ -10,8 +10,8 @@ const corsHeaders = {
 const AGENT_TEMPLATES = [
   { name: "Business Analyst", role: "Requirements Analysis", icon: "FileSearch" },
   { name: "Technical Architect", role: "System Design", icon: "Blocks" },
-  { name: "Admin Agent", role: "Access & Config", icon: "Shield" },
   { name: "Developer Agent", role: "Implementation", icon: "Code" },
+  { name: "Admin Agent", role: "Access & Config", icon: "Shield" },
   { name: "QA Agent", role: "Testing & Validation", icon: "TestTube2" },
   { name: "DevOps Agent", role: "CI/CD & Deployment", icon: "GitBranch" },
 ];
@@ -27,7 +27,6 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Verify user
     const anonClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!);
     const { data: { user }, error: authErr } = await anonClient.auth.getUser(authHeader.replace("Bearer ", ""));
     if (authErr || !user) throw new Error("Unauthorized");
@@ -35,7 +34,6 @@ serve(async (req) => {
     const { projectId } = await req.json();
     if (!projectId) throw new Error("projectId required");
 
-    // Verify ownership
     const { data: project, error: projErr } = await supabase
       .from("projects")
       .select("id, title, description")
@@ -44,19 +42,16 @@ serve(async (req) => {
       .single();
     if (projErr || !project) throw new Error("Project not found or access denied");
 
-    // Get artifacts
     const { data: artifacts } = await supabase
       .from("project_artifacts")
       .select("name, file_type, storage_path")
       .eq("project_id", projectId);
 
-    // Get stakeholders
     const { data: stakeholders } = await supabase
       .from("project_stakeholders")
       .select("name, role, email")
       .eq("project_id", projectId);
 
-    // Download text content from artifacts
     let artifactContents = "";
     for (const art of (artifacts || [])) {
       if (art.file_type?.includes("text") || art.file_type?.includes("pdf") || art.name.endsWith(".txt") || art.name.endsWith(".md")) {
@@ -72,6 +67,10 @@ serve(async (req) => {
 
     const stakeholderInfo = (stakeholders || []).map((s: any) => `${s.name} (${s.role || "N/A"})`).join(", ");
 
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
+    // Step 1: Extract requirements
     const prompt = `You are a Business Analyst AI. Analyze the following project information and extract software requirements.
 
 Project: ${project.title}
@@ -81,10 +80,7 @@ Stakeholders: ${stakeholderInfo || "N/A"}
 Project Artifacts:
 ${artifactContents || "No text artifacts available. Generate requirements based on project title and description."}
 
-Extract 3-8 actionable software requirements. Each requirement should have a clear title and description.`;
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+Extract 3-8 actionable software requirements. Each requirement should have a clear title, description, and a detailed BA analysis.`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -95,7 +91,7 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: "You are a Business Analyst. Extract software requirements from project artifacts." },
+          { role: "system", content: "You are a Business Analyst. Extract software requirements from project artifacts. For each requirement, also provide a detailed BA analysis document." },
           { role: "user", content: prompt },
         ],
         tools: [
@@ -103,7 +99,7 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
             type: "function",
             function: {
               name: "extract_requirements",
-              description: "Extract software requirements from project artifacts",
+              description: "Extract software requirements with detailed BA analysis",
               parameters: {
                 type: "object",
                 properties: {
@@ -115,8 +111,9 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
                         title: { type: "string", description: "Short requirement title" },
                         description: { type: "string", description: "Detailed requirement description" },
                         priority: { type: "string", enum: ["low", "medium", "high", "critical"] },
+                        ba_analysis: { type: "string", description: "Detailed BA analysis in markdown: user stories, acceptance criteria, business rules, dependencies, risks, and assumptions" },
                       },
-                      required: ["title", "description", "priority"],
+                      required: ["title", "description", "priority", "ba_analysis"],
                       additionalProperties: false,
                     },
                   },
@@ -134,15 +131,9 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
     if (!aiResponse.ok) {
       const errText = await aiResponse.text();
       console.error("AI gateway error:", aiResponse.status, errText);
-      
       if (aiResponse.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       throw new Error("AI processing failed");
@@ -155,7 +146,6 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
     const extracted = JSON.parse(toolCall.function.arguments);
     const reqs = extracted.requirements || [];
 
-    // Find BA stakeholder
     const { data: baStakeholders } = await supabase
       .from("project_stakeholders")
       .select("name")
@@ -186,10 +176,16 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
         agent_icon: t.icon,
         status: t.name === "Business Analyst" ? "in-progress" : "pending",
       }));
-
       await supabase.from("requirement_agents").insert(agents);
 
-      // Create notification for BA approval
+      // Save BA output
+      await supabase.from("agent_outputs").insert({
+        requirement_id: newReq.id,
+        agent_name: "Business Analyst",
+        content: req.ba_analysis || req.description,
+        output_type: "requirements_analysis",
+      });
+
       await supabase.from("notifications").insert({
         user_id: user.id,
         project_id: projectId,
