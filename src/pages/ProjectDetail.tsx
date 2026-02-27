@@ -21,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Requirement, AgentInfo, AgentStatus, AGENT_TEMPLATES, WorkflowStatus } from "@/types/requirement";
 
 const PRIORITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
+const AGENT_ORDER = new Map(AGENT_TEMPLATES.map((agent, index) => [agent.name, index]));
 
 function getOverallStatus(agents: { status: AgentStatus }[]): AgentStatus {
   if (agents.some((a) => a.status === "failed")) return "failed";
@@ -133,13 +134,20 @@ const ProjectDetail = () => {
         priority: r.priority as Requirement["priority"],
         createdAt: r.created_at.split("T")[0],
         workflowStatus: (r.workflow_status || "pending_ba_approval") as WorkflowStatus,
-        agents: (agentsByReq.get(r.id) || []).map((a) => ({
-          id: a.id,
-          name: a.agent_name,
-          role: a.agent_role,
-          icon: a.agent_icon,
-          status: a.status as AgentStatus,
-        })),
+        agents: (agentsByReq.get(r.id) || [])
+          .slice()
+          .sort((a, b) => {
+            const aOrder = AGENT_ORDER.get(a.agent_name) ?? Number.MAX_SAFE_INTEGER;
+            const bOrder = AGENT_ORDER.get(b.agent_name) ?? Number.MAX_SAFE_INTEGER;
+            return aOrder - bOrder;
+          })
+          .map((a) => ({
+            id: a.id,
+            name: a.agent_name,
+            role: a.agent_role,
+            icon: a.agent_icon,
+            status: a.status as AgentStatus,
+          })),
       }));
       setRequirements(reqs);
     } else {
