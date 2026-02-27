@@ -8,9 +8,10 @@ const corsHeaders = {
 };
 
 // Agent order: BA → Architect → Developer → Admin → QA → DevOps
+// Order after Architect approval: Admin → Developer → QA → DevOps
 const DOWNSTREAM_AGENTS = [
-  { name: "Developer Agent", prompt: "Generate implementation code", outputType: "code" },
   { name: "Admin Agent", prompt: "Generate access control metadata and configuration", outputType: "metadata" },
+  { name: "Developer Agent", prompt: "Generate implementation code", outputType: "code" },
   { name: "QA Agent", prompt: "Generate test cases and validation plan", outputType: "test_cases" },
   { name: "DevOps Agent", prompt: "Generate CI/CD pipeline and deployment configuration", outputType: "deployment" },
 ];
