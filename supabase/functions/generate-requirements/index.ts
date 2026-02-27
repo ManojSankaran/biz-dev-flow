@@ -10,8 +10,8 @@ const corsHeaders = {
 const AGENT_TEMPLATES = [
   { name: "Business Analyst", role: "Requirements Analysis", icon: "FileSearch" },
   { name: "Technical Architect", role: "System Design", icon: "Blocks" },
-  { name: "Developer Agent", role: "Implementation", icon: "Code" },
   { name: "Admin Agent", role: "Access & Config", icon: "Shield" },
+  { name: "Developer Agent", role: "Implementation", icon: "Code" },
   { name: "QA Agent", role: "Testing & Validation", icon: "TestTube2" },
   { name: "DevOps Agent", role: "CI/CD & Deployment", icon: "GitBranch" },
 ];
