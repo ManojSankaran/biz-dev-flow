@@ -70,8 +70,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    // Step 1: Extract requirements
-    const prompt = `You are a Business Analyst AI. Analyze the following project information and extract software requirements.
+    const prompt = `You are a Salesforce Business Analyst. Analyze the following project information and extract Salesforce-specific software requirements.
 
 Project: ${project.title}
 Description: ${project.description || "N/A"}
@@ -80,7 +79,16 @@ Stakeholders: ${stakeholderInfo || "N/A"}
 Project Artifacts:
 ${artifactContents || "No text artifacts available. Generate requirements based on project title and description."}
 
-Extract 3-8 actionable software requirements. Each requirement should have a clear title, description, and a detailed BA analysis.`;
+Extract 3-8 actionable Salesforce implementation requirements. Each requirement should:
+- Have a clear title describing the Salesforce feature/component
+- Include a detailed description covering what needs to be built on the Salesforce platform
+- Include a comprehensive BA analysis with:
+  - User stories in the format "As a [role], I want [feature], so that [benefit]"
+  - Acceptance criteria with specific Salesforce validations
+  - Business rules including field validations, workflow rules, and automation logic
+  - Salesforce-specific considerations (governor limits, sharing model, data volume)
+  - Dependencies on existing Salesforce objects, packages, or integrations
+  - Risks and assumptions`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -91,7 +99,7 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: "You are a Business Analyst. Extract software requirements from project artifacts. For each requirement, also provide a detailed BA analysis document." },
+          { role: "system", content: "You are a Salesforce Business Analyst. Extract Salesforce-specific software requirements from project artifacts. Focus on Salesforce platform capabilities: custom objects, Apex, LWC, flows, validation rules, permission sets, etc." },
           { role: "user", content: prompt },
         ],
         tools: [
@@ -99,7 +107,7 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
             type: "function",
             function: {
               name: "extract_requirements",
-              description: "Extract software requirements with detailed BA analysis",
+              description: "Extract Salesforce software requirements with detailed BA analysis",
               parameters: {
                 type: "object",
                 properties: {
@@ -108,10 +116,10 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
                     items: {
                       type: "object",
                       properties: {
-                        title: { type: "string", description: "Short requirement title" },
-                        description: { type: "string", description: "Detailed requirement description" },
+                        title: { type: "string", description: "Short Salesforce requirement title" },
+                        description: { type: "string", description: "Detailed Salesforce requirement description" },
                         priority: { type: "string", enum: ["low", "medium", "high", "critical"] },
-                        ba_analysis: { type: "string", description: "Detailed BA analysis in markdown: user stories, acceptance criteria, business rules, dependencies, risks, and assumptions" },
+                        ba_analysis: { type: "string", description: "Detailed BA analysis in markdown: user stories, acceptance criteria, business rules, Salesforce-specific considerations, dependencies, risks, and assumptions" },
                       },
                       required: ["title", "description", "priority", "ba_analysis"],
                       additionalProperties: false,
@@ -178,7 +186,6 @@ Extract 3-8 actionable software requirements. Each requirement should have a cle
       }));
       await supabase.from("requirement_agents").insert(agents);
 
-      // Save BA output
       await supabase.from("agent_outputs").insert({
         requirement_id: newReq.id,
         agent_name: "Business Analyst",
