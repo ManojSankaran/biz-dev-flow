@@ -168,6 +168,53 @@ export type Database = {
           },
         ]
       }
+      project_devops_config: {
+        Row: {
+          auth_token: string | null
+          branch: string
+          created_at: string
+          id: string
+          project_id: string
+          project_structure: string
+          provider: string
+          repo_url: string
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          auth_token?: string | null
+          branch?: string
+          created_at?: string
+          id?: string
+          project_id: string
+          project_structure?: string
+          provider?: string
+          repo_url: string
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          auth_token?: string | null
+          branch?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          project_structure?: string
+          provider?: string
+          repo_url?: string
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_devops_config_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_stakeholders: {
         Row: {
           created_at: string

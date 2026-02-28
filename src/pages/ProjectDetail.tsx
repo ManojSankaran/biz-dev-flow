@@ -14,7 +14,7 @@ import { SearchFilterBar, PriorityFilter, StatusFilter, SortOption } from "@/com
 import { NotificationBell } from "@/components/NotificationBell";
 import {
   Activity, ArrowLeft, Users, FileUp, LayoutList, BarChart3, Plus, Loader2, Trash2,
-  Upload, File, Image, FileText, Sparkles, UserPlus
+  Upload, File, Image, FileText, Sparkles, UserPlus, GitBranch, Save, Pencil
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -46,6 +46,16 @@ interface Artifact {
   uploaded_at: string;
 }
 
+interface DevOpsConfig {
+  id?: string;
+  provider: string;
+  repo_url: string;
+  branch: string;
+  auth_token: string;
+  username: string;
+  project_structure: string;
+}
+
 interface DbRequirement {
   id: string;
   title: string;
@@ -64,6 +74,15 @@ interface DbAgent {
   status: string;
 }
 
+const EMPTY_DEVOPS: DevOpsConfig = {
+  provider: "github",
+  repo_url: "",
+  branch: "main",
+  auth_token: "",
+  username: "",
+  project_structure: "sfdx",
+};
+
 const ProjectDetail = () => {
   const { id: projectId } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -75,6 +94,12 @@ const ProjectDetail = () => {
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // DevOps config
+  const [devopsConfig, setDevopsConfig] = useState<DevOpsConfig>(EMPTY_DEVOPS);
+  const [devopsEditing, setDevopsEditing] = useState(false);
+  const [devopsSaving, setDevopsSaving] = useState(false);
+  const [devopsExists, setDevopsExists] = useState(false);
 
   // Stakeholder form
   const [shDialogOpen, setShDialogOpen] = useState(false);
@@ -102,16 +127,36 @@ const ProjectDetail = () => {
 
   const fetchAll = useCallback(async () => {
     if (!projectId) return;
-    const [projRes, shRes, artRes, reqRes] = await Promise.all([
+    const [projRes, shRes, artRes, reqRes, devopsRes] = await Promise.all([
       supabase.from("projects").select("title, description").eq("id", projectId).single(),
       supabase.from("project_stakeholders").select("*").eq("project_id", projectId).order("created_at"),
       supabase.from("project_artifacts").select("*").eq("project_id", projectId).order("uploaded_at", { ascending: false }),
       supabase.from("requirements").select("*").eq("project_id", projectId).order("created_at", { ascending: false }),
+      supabase.from("project_devops_config" as any).select("*").eq("project_id", projectId).maybeSingle(),
     ]);
 
     if (projRes.data) setProject(projRes.data);
     if (shRes.data) setStakeholders(shRes.data as Stakeholder[]);
     if (artRes.data) setArtifacts(artRes.data as Artifact[]);
+
+    if (devopsRes.data) {
+      const d = devopsRes.data as any;
+      setDevopsConfig({
+        id: d.id,
+        provider: d.provider || "github",
+        repo_url: d.repo_url || "",
+        branch: d.branch || "main",
+        auth_token: d.auth_token || "",
+        username: d.username || "",
+        project_structure: d.project_structure || "sfdx",
+      });
+      setDevopsExists(true);
+      setDevopsEditing(false);
+    } else {
+      setDevopsConfig(EMPTY_DEVOPS);
+      setDevopsExists(false);
+      setDevopsEditing(true);
+    }
 
     if (reqRes.data && reqRes.data.length > 0) {
       const reqIds = (reqRes.data as DbRequirement[]).map((r) => r.id);
@@ -158,6 +203,49 @@ const ProjectDetail = () => {
   }, [projectId]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  // --- DevOps config save ---
+  const saveDevopsConfig = async () => {
+    if (!projectId || !devopsConfig.repo_url.trim()) {
+      toast({ title: "Error", description: "Repository URL is required", variant: "destructive" });
+      return;
+    }
+    setDevopsSaving(true);
+    const payload = {
+      project_id: projectId,
+      provider: devopsConfig.provider,
+      repo_url: devopsConfig.repo_url.trim(),
+      branch: devopsConfig.branch.trim() || "main",
+      auth_token: devopsConfig.auth_token.trim() || null,
+      username: devopsConfig.username.trim() || null,
+      project_structure: devopsConfig.project_structure,
+    };
+
+    let error;
+    if (devopsExists && devopsConfig.id) {
+      ({ error } = await supabase.from("project_devops_config" as any).update(payload).eq("id", devopsConfig.id));
+    } else {
+      ({ error } = await supabase.from("project_devops_config" as any).insert(payload));
+    }
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Saved", description: "DevOps configuration saved successfully" });
+      setDevopsEditing(false);
+      fetchAll();
+    }
+    setDevopsSaving(false);
+  };
+
+  const deleteDevopsConfig = async () => {
+    if (!devopsConfig.id) return;
+    await supabase.from("project_devops_config" as any).delete().eq("id", devopsConfig.id);
+    setDevopsConfig(EMPTY_DEVOPS);
+    setDevopsExists(false);
+    setDevopsEditing(true);
+    toast({ title: "Deleted", description: "DevOps configuration removed" });
+  };
 
   const addStakeholder = async () => {
     if (!shName.trim() || !projectId) return;
@@ -213,7 +301,6 @@ const ProjectDetail = () => {
       .single();
     if (error || !reqData) { toast({ title: "Error", description: error?.message, variant: "destructive" }); return; }
 
-    // Create agent entries
     const agentInserts = AGENT_TEMPLATES.map((t) => ({
       requirement_id: reqData.id,
       agent_name: t.name,
@@ -293,6 +380,11 @@ const ProjectDetail = () => {
     return <File className="h-4 w-4 text-muted-foreground" />;
   };
 
+  const providerLabel = (p: string) => {
+    const map: Record<string, string> = { github: "GitHub", gitlab: "GitLab", bitbucket: "Bitbucket", azure_devops: "Azure DevOps" };
+    return map[p] || p;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -338,6 +430,9 @@ const ProjectDetail = () => {
             <TabsTrigger value="artifacts" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               <FileUp className="h-3.5 w-3.5" />Artifacts
               {artifacts.length > 0 && <span className="ml-1 h-4 min-w-4 rounded-full bg-primary/20 text-primary text-[10px] font-mono flex items-center justify-center px-1">{artifacts.length}</span>}
+            </TabsTrigger>
+            <TabsTrigger value="devops" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              <GitBranch className="h-3.5 w-3.5" />DevOps Config
             </TabsTrigger>
             <TabsTrigger value="requirements" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               <LayoutList className="h-3.5 w-3.5" />Requirements
@@ -428,6 +523,114 @@ const ProjectDetail = () => {
                       </Button>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* DevOps Config Tab */}
+          <TabsContent value="devops" className="mt-4">
+            <div className="rounded-xl border bg-card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-card-foreground">DevOps Configuration</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Configure repository credentials for automated deployment by the DevOps agent.</p>
+                </div>
+                {devopsExists && !devopsEditing && (
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setDevopsEditing(true)}>
+                      <Pencil className="h-3.5 w-3.5" />Edit
+                    </Button>
+                    <Button size="sm" variant="ghost" className="text-destructive gap-1.5" onClick={deleteDevopsConfig}>
+                      <Trash2 className="h-3.5 w-3.5" />Remove
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {!devopsEditing && devopsExists ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="rounded-lg bg-secondary/20 px-4 py-3">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Provider</p>
+                      <p className="text-sm font-medium text-card-foreground">{providerLabel(devopsConfig.provider)}</p>
+                    </div>
+                    <div className="rounded-lg bg-secondary/20 px-4 py-3">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Branch</p>
+                      <p className="text-sm font-medium text-card-foreground font-mono">{devopsConfig.branch}</p>
+                    </div>
+                    <div className="rounded-lg bg-secondary/20 px-4 py-3 col-span-2">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Repository URL</p>
+                      <p className="text-sm font-medium text-card-foreground font-mono truncate">{devopsConfig.repo_url}</p>
+                    </div>
+                    <div className="rounded-lg bg-secondary/20 px-4 py-3">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Username</p>
+                      <p className="text-sm font-medium text-card-foreground">{devopsConfig.username || "—"}</p>
+                    </div>
+                    <div className="rounded-lg bg-secondary/20 px-4 py-3">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Project Structure</p>
+                      <p className="text-sm font-medium text-card-foreground">{devopsConfig.project_structure === "sfdx" ? "SFDX (force-app/)" : devopsConfig.project_structure === "mdapi" ? "MDAPI (src/)" : "Auto-detect"}</p>
+                    </div>
+                    <div className="rounded-lg bg-secondary/20 px-4 py-3 col-span-2">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Auth Token</p>
+                      <p className="text-sm font-medium text-card-foreground font-mono">{"•".repeat(12)}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-muted-foreground">Provider *</label>
+                      <Select value={devopsConfig.provider} onValueChange={(v) => setDevopsConfig((c) => ({ ...c, provider: v }))}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="github">GitHub</SelectItem>
+                          <SelectItem value="gitlab">GitLab</SelectItem>
+                          <SelectItem value="bitbucket">Bitbucket</SelectItem>
+                          <SelectItem value="azure_devops">Azure DevOps</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-muted-foreground">Branch</label>
+                      <Input placeholder="main" value={devopsConfig.branch} onChange={(e) => setDevopsConfig((c) => ({ ...c, branch: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Repository URL *</label>
+                    <Input placeholder="https://github.com/org/repo.git" value={devopsConfig.repo_url} onChange={(e) => setDevopsConfig((c) => ({ ...c, repo_url: e.target.value }))} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-muted-foreground">Username</label>
+                      <Input placeholder="Username / Service Account" value={devopsConfig.username} onChange={(e) => setDevopsConfig((c) => ({ ...c, username: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-muted-foreground">Auth Token / PAT</label>
+                      <Input type="password" placeholder="Personal Access Token" value={devopsConfig.auth_token} onChange={(e) => setDevopsConfig((c) => ({ ...c, auth_token: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Salesforce Project Structure</label>
+                    <Select value={devopsConfig.project_structure} onValueChange={(v) => setDevopsConfig((c) => ({ ...c, project_structure: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sfdx">SFDX — force-app/main/default/</SelectItem>
+                        <SelectItem value="mdapi">MDAPI — src/</SelectItem>
+                        <SelectItem value="auto">Auto-detect from repository</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button onClick={saveDevopsConfig} disabled={devopsSaving || !devopsConfig.repo_url.trim()} className="gap-1.5">
+                      {devopsSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                      {devopsExists ? "Update" : "Save"} Configuration
+                    </Button>
+                    {devopsExists && (
+                      <Button variant="ghost" onClick={() => { setDevopsEditing(false); fetchAll(); }}>Cancel</Button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
