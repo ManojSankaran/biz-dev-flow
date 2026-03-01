@@ -14,8 +14,9 @@ import { SearchFilterBar, PriorityFilter, StatusFilter, SortOption } from "@/com
 import { NotificationBell } from "@/components/NotificationBell";
 import {
   Activity, ArrowLeft, Users, FileUp, LayoutList, BarChart3, Plus, Loader2, Trash2,
-  Upload, File, Image, FileText, Sparkles, UserPlus, GitBranch, Save, Pencil
+  Upload, File, Image, FileText, Sparkles, UserPlus, GitBranch, Save, Pencil, MessageSquare
 } from "lucide-react";
+import { ProjectScopingChat } from "@/components/ProjectScopingChat";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Requirement, AgentInfo, AgentStatus, AGENT_TEMPLATES, WorkflowStatus } from "@/types/requirement";
@@ -89,7 +90,7 @@ const ProjectDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [project, setProject] = useState<{ title: string; description: string | null } | null>(null);
+  const [project, setProject] = useState<{ title: string; description: string | null; scoping_status?: string } | null>(null);
   const [stakeholders, setStakeholders] = useState<Stakeholder[]>([]);
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
@@ -128,7 +129,7 @@ const ProjectDetail = () => {
   const fetchAll = useCallback(async () => {
     if (!projectId) return;
     const [projRes, shRes, artRes, reqRes, devopsRes] = await Promise.all([
-      supabase.from("projects").select("title, description").eq("id", projectId).single(),
+      supabase.from("projects").select("title, description, scoping_status").eq("id", projectId).single(),
       supabase.from("project_stakeholders").select("*").eq("project_id", projectId).order("created_at"),
       supabase.from("project_artifacts").select("*").eq("project_id", projectId).order("uploaded_at", { ascending: false }),
       supabase.from("requirements").select("*").eq("project_id", projectId).order("created_at", { ascending: false }),
@@ -431,6 +432,9 @@ const ProjectDetail = () => {
               <FileUp className="h-3.5 w-3.5" />Artifacts
               {artifacts.length > 0 && <span className="ml-1 h-4 min-w-4 rounded-full bg-primary/20 text-primary text-[10px] font-mono flex items-center justify-center px-1">{artifacts.length}</span>}
             </TabsTrigger>
+            <TabsTrigger value="scoping" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              <MessageSquare className="h-3.5 w-3.5" />Scoping
+            </TabsTrigger>
             <TabsTrigger value="devops" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               <GitBranch className="h-3.5 w-3.5" />DevOps Config
             </TabsTrigger>
@@ -526,6 +530,18 @@ const ProjectDetail = () => {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          {/* Scoping Tab */}
+          <TabsContent value="scoping" className="mt-4">
+            {projectId && (
+              <ProjectScopingChat
+                projectId={projectId}
+                scopingStatus={(project as any)?.scoping_status || "not_started"}
+                artifactCount={artifacts.length}
+                onScopingComplete={fetchAll}
+              />
+            )}
           </TabsContent>
 
           {/* DevOps Config Tab */}

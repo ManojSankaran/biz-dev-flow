@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.approve-requirement]
 verify_jwt = false
+
+[functions.project-scoping-chat]
+verify_jwt = false
