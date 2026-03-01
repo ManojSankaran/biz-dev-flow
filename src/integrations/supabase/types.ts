@@ -168,6 +168,38 @@ export type Database = {
           },
         ]
       }
+      project_conversations: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          project_id: string
+          role: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          project_id: string
+          role: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_conversations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_devops_config: {
         Row: {
           auth_token: string | null
@@ -259,6 +291,7 @@ export type Database = {
           description: string | null
           id: string
           owner_id: string
+          scoping_status: string
           title: string
           updated_at: string
         }
@@ -267,6 +300,7 @@ export type Database = {
           description?: string | null
           id?: string
           owner_id: string
+          scoping_status?: string
           title: string
           updated_at?: string
         }
@@ -275,6 +309,7 @@ export type Database = {
           description?: string | null
           id?: string
           owner_id?: string
+          scoping_status?: string
           title?: string
           updated_at?: string
         }
