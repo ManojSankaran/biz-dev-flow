@@ -52,6 +52,47 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -247,6 +288,44 @@ export type Database = {
           },
         ]
       }
+      project_members: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string | null
+          project_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          project_id: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          project_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_stakeholders: {
         Row: {
           created_at: string
@@ -353,6 +432,56 @@ export type Database = {
           },
         ]
       }
+      requirement_versions: {
+        Row: {
+          change_reason: string | null
+          changed_by: string
+          created_at: string
+          description: string | null
+          id: string
+          priority: string
+          requirement_id: string
+          snapshot: Json | null
+          title: string
+          version_number: number
+          workflow_status: string
+        }
+        Insert: {
+          change_reason?: string | null
+          changed_by: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          priority: string
+          requirement_id: string
+          snapshot?: Json | null
+          title: string
+          version_number?: number
+          workflow_status: string
+        }
+        Update: {
+          change_reason?: string | null
+          changed_by?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          priority?: string
+          requirement_id?: string
+          snapshot?: Json | null
+          title?: string
+          version_number?: number
+          workflow_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requirement_versions_requirement_id_fkey"
+            columns: ["requirement_id"]
+            isOneToOne: false
+            referencedRelation: "requirements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       requirements: {
         Row: {
           created_at: string
@@ -435,10 +564,22 @@ export type Database = {
         Args: { requirement_id_input: string }
         Returns: boolean
       }
+      get_project_role: {
+        Args: { p_project_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      is_project_member: { Args: { p_project_id: string }; Returns: boolean }
       is_project_owner: { Args: { project_id_input: string }; Returns: boolean }
     }
     Enums: {
       agent_status: "pending" | "in-progress" | "completed" | "failed"
+      app_role:
+        | "admin"
+        | "project_manager"
+        | "business_analyst"
+        | "architect"
+        | "developer"
+        | "viewer"
       requirement_priority: "low" | "medium" | "high" | "critical"
       workflow_status:
         | "pending_ba_approval"
@@ -576,6 +717,14 @@ export const Constants = {
   public: {
     Enums: {
       agent_status: ["pending", "in-progress", "completed", "failed"],
+      app_role: [
+        "admin",
+        "project_manager",
+        "business_analyst",
+        "architect",
+        "developer",
+        "viewer",
+      ],
       requirement_priority: ["low", "medium", "high", "critical"],
       workflow_status: [
         "pending_ba_approval",
