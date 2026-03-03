@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RequirementCard } from "@/components/RequirementCard";
-import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
+import { ProjectActivityDashboard } from "@/components/ProjectActivityDashboard";
 import { SearchFilterBar, PriorityFilter, StatusFilter, SortOption } from "@/components/SearchFilterBar";
 import { NotificationBell } from "@/components/NotificationBell";
 import {
@@ -448,8 +448,8 @@ const ProjectDetail = () => {
             <TabsTrigger value="governance" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               <Shield className="h-3.5 w-3.5" />Governance
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
-              <BarChart3 className="h-3.5 w-3.5" />Analytics
+             <TabsTrigger value="analytics" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              <BarChart3 className="h-3.5 w-3.5" />Dashboard
             </TabsTrigger>
           </TabsList>
 
@@ -726,7 +726,7 @@ const ProjectDetail = () => {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="mt-4">
-            <AnalyticsDashboard requirements={requirements} />
+            {projectId && <ProjectActivityDashboard projectId={projectId} requirements={requirements} />}
           </TabsContent>
         </Tabs>
       </main>
