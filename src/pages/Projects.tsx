@@ -28,6 +28,10 @@ const Projects = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [targetGoLive, setTargetGoLive] = useState("");
+  const [sfEdition, setSfEdition] = useState("");
+  const [orgType, setOrgType] = useState("");
+  const [sandboxUrl, setSandboxUrl] = useState("");
   const [creating, setCreating] = useState(false);
 
   const fetchProjects = async () => {
