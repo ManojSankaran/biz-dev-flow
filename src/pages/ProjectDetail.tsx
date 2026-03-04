@@ -328,7 +328,7 @@ const ProjectDetail = () => {
     await supabase.from("requirement_agents").insert(agentInserts);
 
     setReqDialogOpen(false);
-    setReqTitle(""); setReqDesc(""); setReqPriority("medium");
+    setReqTitle(""); setReqDesc(""); setReqPriority("medium"); setReqCloud(""); setReqModule(""); setReqComponentType(""); setReqEffort("");
     fetchAll();
   };
 
