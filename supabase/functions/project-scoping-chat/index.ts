@@ -329,6 +329,10 @@ For each requirement include a detailed BA analysis with:
             description: r.description,
             priority: r.priority,
             workflow_status: "pending_ba_approval",
+            sf_cloud: r.sf_cloud || null,
+            component_type: r.component_type || null,
+            module_name: r.module_name || null,
+            effort_estimate: r.effort_estimate || null,
           })
           .select()
           .single();
