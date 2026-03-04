@@ -50,7 +50,15 @@ const Projects = () => {
     setCreating(true);
     const { data, error } = await supabase
       .from("projects")
-      .insert({ title: title.trim(), description: description.trim() || null, owner_id: user.id })
+      .insert({
+        title: title.trim(),
+        description: description.trim() || null,
+        owner_id: user.id,
+        target_go_live: targetGoLive || null,
+        salesforce_edition: sfEdition || null,
+        org_type: orgType || null,
+        sandbox_url: sandboxUrl.trim() || null,
+      } as any)
       .select()
       .single();
     setCreating(false);
