@@ -304,7 +304,16 @@ const ProjectDetail = () => {
     if (!reqTitle.trim() || !projectId) return;
     const { data: reqData, error } = await supabase
       .from("requirements")
-      .insert({ project_id: projectId, title: reqTitle.trim(), description: reqDesc.trim() || null, priority: reqPriority })
+      .insert({
+        project_id: projectId,
+        title: reqTitle.trim(),
+        description: reqDesc.trim() || null,
+        priority: reqPriority,
+        sf_cloud: reqCloud || null,
+        module_name: reqModule.trim() || null,
+        component_type: reqComponentType || null,
+        effort_estimate: reqEffort || null,
+      } as any)
       .select()
       .single();
     if (error || !reqData) { toast({ title: "Error", description: error?.message, variant: "destructive" }); return; }
