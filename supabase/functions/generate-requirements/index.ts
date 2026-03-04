@@ -179,6 +179,10 @@ Extract 3-8 actionable Salesforce implementation requirements. Each requirement 
           description: req.description,
           priority: req.priority,
           workflow_status: "pending_ba_approval",
+          sf_cloud: req.sf_cloud || null,
+          component_type: req.component_type || null,
+          module_name: req.module_name || null,
+          effort_estimate: req.effort_estimate || null,
         })
         .select()
         .single();
