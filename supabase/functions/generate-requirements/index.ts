@@ -129,7 +129,7 @@ Extract 3-8 actionable Salesforce implementation requirements. Each requirement 
                         effort_estimate: { type: "string", enum: ["xs", "s", "m", "l", "xl"], description: "T-shirt size effort estimate" },
                         ba_analysis: { type: "string", description: "Detailed BA analysis in markdown: user stories, acceptance criteria, business rules, Salesforce-specific considerations, dependencies, risks, and assumptions" },
                       },
-                      required: ["title", "description", "priority", "ba_analysis"],
+                      required: ["title", "description", "priority", "sf_cloud", "component_type", "module_name", "effort_estimate", "ba_analysis"],
                       additionalProperties: false,
                     },
                   },
