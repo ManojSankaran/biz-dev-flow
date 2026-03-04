@@ -82,6 +82,10 @@ ${artifactContents || "No text artifacts available. Generate requirements based 
 Extract 3-8 actionable Salesforce implementation requirements. Each requirement should:
 - Have a clear title describing the Salesforce feature/component
 - Include a detailed description covering what needs to be built on the Salesforce platform
+- Identify the Salesforce Cloud (sales_cloud, service_cloud, experience_cloud, marketing_cloud, commerce_cloud, analytics_cloud, platform, other)
+- Identify the primary component type (apex_class, apex_trigger, lwc, aura, flow, validation_rule, custom_object, custom_field, integration, report_dashboard, permission_set, other)
+- Identify the module or feature area (e.g. "Opportunity Management", "Case Routing", "Lead Scoring")
+- Estimate effort using t-shirt sizing (xs, s, m, l, xl)
 - Include a comprehensive BA analysis with:
   - User stories in the format "As a [role], I want [feature], so that [benefit]"
   - Acceptance criteria with specific Salesforce validations
