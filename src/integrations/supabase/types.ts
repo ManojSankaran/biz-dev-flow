@@ -369,8 +369,14 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          org_type: Database["public"]["Enums"]["org_type"] | null
           owner_id: string
+          salesforce_edition:
+            | Database["public"]["Enums"]["salesforce_edition"]
+            | null
+          sandbox_url: string | null
           scoping_status: string
+          target_go_live: string | null
           title: string
           updated_at: string
         }
@@ -378,8 +384,14 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          org_type?: Database["public"]["Enums"]["org_type"] | null
           owner_id: string
+          salesforce_edition?:
+            | Database["public"]["Enums"]["salesforce_edition"]
+            | null
+          sandbox_url?: string | null
           scoping_status?: string
+          target_go_live?: string | null
           title: string
           updated_at?: string
         }
@@ -387,8 +399,14 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          org_type?: Database["public"]["Enums"]["org_type"] | null
           owner_id?: string
+          salesforce_edition?:
+            | Database["public"]["Enums"]["salesforce_edition"]
+            | null
+          sandbox_url?: string | null
           scoping_status?: string
+          target_go_live?: string | null
           title?: string
           updated_at?: string
         }
@@ -484,31 +502,46 @@ export type Database = {
       }
       requirements: {
         Row: {
+          component_type: Database["public"]["Enums"]["component_type"] | null
           created_at: string
+          depends_on: string[] | null
           description: string | null
+          effort_estimate: Database["public"]["Enums"]["effort_size"] | null
           id: string
+          module_name: string | null
           priority: Database["public"]["Enums"]["requirement_priority"]
           project_id: string
+          sf_cloud: Database["public"]["Enums"]["salesforce_cloud"] | null
           title: string
           updated_at: string
           workflow_status: Database["public"]["Enums"]["workflow_status"]
         }
         Insert: {
+          component_type?: Database["public"]["Enums"]["component_type"] | null
           created_at?: string
+          depends_on?: string[] | null
           description?: string | null
+          effort_estimate?: Database["public"]["Enums"]["effort_size"] | null
           id?: string
+          module_name?: string | null
           priority?: Database["public"]["Enums"]["requirement_priority"]
           project_id: string
+          sf_cloud?: Database["public"]["Enums"]["salesforce_cloud"] | null
           title: string
           updated_at?: string
           workflow_status?: Database["public"]["Enums"]["workflow_status"]
         }
         Update: {
+          component_type?: Database["public"]["Enums"]["component_type"] | null
           created_at?: string
+          depends_on?: string[] | null
           description?: string | null
+          effort_estimate?: Database["public"]["Enums"]["effort_size"] | null
           id?: string
+          module_name?: string | null
           priority?: Database["public"]["Enums"]["requirement_priority"]
           project_id?: string
+          sf_cloud?: Database["public"]["Enums"]["salesforce_cloud"] | null
           title?: string
           updated_at?: string
           workflow_status?: Database["public"]["Enums"]["workflow_status"]
@@ -580,7 +613,43 @@ export type Database = {
         | "architect"
         | "developer"
         | "viewer"
+      component_type:
+        | "apex_class"
+        | "apex_trigger"
+        | "lwc"
+        | "aura"
+        | "flow"
+        | "validation_rule"
+        | "custom_object"
+        | "custom_field"
+        | "integration"
+        | "report_dashboard"
+        | "permission_set"
+        | "other"
+      effort_size: "xs" | "s" | "m" | "l" | "xl"
+      org_type:
+        | "production"
+        | "full_sandbox"
+        | "partial_sandbox"
+        | "developer_sandbox"
+        | "scratch_org"
+        | "developer_org"
       requirement_priority: "low" | "medium" | "high" | "critical"
+      salesforce_cloud:
+        | "sales_cloud"
+        | "service_cloud"
+        | "experience_cloud"
+        | "marketing_cloud"
+        | "commerce_cloud"
+        | "analytics_cloud"
+        | "platform"
+        | "other"
+      salesforce_edition:
+        | "developer"
+        | "professional"
+        | "enterprise"
+        | "unlimited"
+        | "performance"
       workflow_status:
         | "pending_ba_approval"
         | "ba_approved"
@@ -725,7 +794,47 @@ export const Constants = {
         "developer",
         "viewer",
       ],
+      component_type: [
+        "apex_class",
+        "apex_trigger",
+        "lwc",
+        "aura",
+        "flow",
+        "validation_rule",
+        "custom_object",
+        "custom_field",
+        "integration",
+        "report_dashboard",
+        "permission_set",
+        "other",
+      ],
+      effort_size: ["xs", "s", "m", "l", "xl"],
+      org_type: [
+        "production",
+        "full_sandbox",
+        "partial_sandbox",
+        "developer_sandbox",
+        "scratch_org",
+        "developer_org",
+      ],
       requirement_priority: ["low", "medium", "high", "critical"],
+      salesforce_cloud: [
+        "sales_cloud",
+        "service_cloud",
+        "experience_cloud",
+        "marketing_cloud",
+        "commerce_cloud",
+        "analytics_cloud",
+        "platform",
+        "other",
+      ],
+      salesforce_edition: [
+        "developer",
+        "professional",
+        "enterprise",
+        "unlimited",
+        "performance",
+      ],
       workflow_status: [
         "pending_ba_approval",
         "ba_approved",
