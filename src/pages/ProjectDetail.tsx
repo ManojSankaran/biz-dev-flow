@@ -116,6 +116,10 @@ const ProjectDetail = () => {
   const [reqTitle, setReqTitle] = useState("");
   const [reqDesc, setReqDesc] = useState("");
   const [reqPriority, setReqPriority] = useState<"low" | "medium" | "high" | "critical">("medium");
+  const [reqCloud, setReqCloud] = useState("");
+  const [reqModule, setReqModule] = useState("");
+  const [reqComponentType, setReqComponentType] = useState("");
+  const [reqEffort, setReqEffort] = useState("");
 
   // Filters
   const [search, setSearch] = useState("");
