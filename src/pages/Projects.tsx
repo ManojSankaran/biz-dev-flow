@@ -67,8 +67,7 @@ const Projects = () => {
       return;
     }
     setDialogOpen(false);
-    setTitle("");
-    setDescription("");
+    setTitle(""); setDescription(""); setTargetGoLive(""); setSfEdition(""); setOrgType(""); setSandboxUrl("");
     if (data) navigate(`/project/${data.id}`);
   };
 
