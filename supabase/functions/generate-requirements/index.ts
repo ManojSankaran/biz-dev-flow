@@ -82,6 +82,10 @@ ${artifactContents || "No text artifacts available. Generate requirements based 
 Extract 3-8 actionable Salesforce implementation requirements. Each requirement should:
 - Have a clear title describing the Salesforce feature/component
 - Include a detailed description covering what needs to be built on the Salesforce platform
+- Identify the Salesforce Cloud (sales_cloud, service_cloud, experience_cloud, marketing_cloud, commerce_cloud, analytics_cloud, platform, other)
+- Identify the primary component type (apex_class, apex_trigger, lwc, aura, flow, validation_rule, custom_object, custom_field, integration, report_dashboard, permission_set, other)
+- Identify the module or feature area (e.g. "Opportunity Management", "Case Routing", "Lead Scoring")
+- Estimate effort using t-shirt sizing (xs, s, m, l, xl)
 - Include a comprehensive BA analysis with:
   - User stories in the format "As a [role], I want [feature], so that [benefit]"
   - Acceptance criteria with specific Salesforce validations
@@ -119,9 +123,13 @@ Extract 3-8 actionable Salesforce implementation requirements. Each requirement 
                         title: { type: "string", description: "Short Salesforce requirement title" },
                         description: { type: "string", description: "Detailed Salesforce requirement description" },
                         priority: { type: "string", enum: ["low", "medium", "high", "critical"] },
+                        sf_cloud: { type: "string", enum: ["sales_cloud", "service_cloud", "experience_cloud", "marketing_cloud", "commerce_cloud", "analytics_cloud", "platform", "other"], description: "Primary Salesforce Cloud" },
+                        component_type: { type: "string", enum: ["apex_class", "apex_trigger", "lwc", "aura", "flow", "validation_rule", "custom_object", "custom_field", "integration", "report_dashboard", "permission_set", "other"], description: "Primary component type" },
+                        module_name: { type: "string", description: "Module or feature area, e.g. Opportunity Management" },
+                        effort_estimate: { type: "string", enum: ["xs", "s", "m", "l", "xl"], description: "T-shirt size effort estimate" },
                         ba_analysis: { type: "string", description: "Detailed BA analysis in markdown: user stories, acceptance criteria, business rules, Salesforce-specific considerations, dependencies, risks, and assumptions" },
                       },
-                      required: ["title", "description", "priority", "ba_analysis"],
+                      required: ["title", "description", "priority", "sf_cloud", "component_type", "module_name", "effort_estimate", "ba_analysis"],
                       additionalProperties: false,
                     },
                   },
@@ -171,6 +179,10 @@ Extract 3-8 actionable Salesforce implementation requirements. Each requirement 
           description: req.description,
           priority: req.priority,
           workflow_status: "pending_ba_approval",
+          sf_cloud: req.sf_cloud || null,
+          component_type: req.component_type || null,
+          module_name: req.module_name || null,
+          effort_estimate: req.effort_estimate || null,
         })
         .select()
         .single();

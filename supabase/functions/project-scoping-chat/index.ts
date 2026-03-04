@@ -273,9 +273,13 @@ For each requirement include a detailed BA analysis with:
                           title: { type: "string" },
                           description: { type: "string" },
                           priority: { type: "string", enum: ["low", "medium", "high", "critical"] },
+                          sf_cloud: { type: "string", enum: ["sales_cloud", "service_cloud", "experience_cloud", "marketing_cloud", "commerce_cloud", "analytics_cloud", "platform", "other"], description: "Primary Salesforce Cloud" },
+                          component_type: { type: "string", enum: ["apex_class", "apex_trigger", "lwc", "aura", "flow", "validation_rule", "custom_object", "custom_field", "integration", "report_dashboard", "permission_set", "other"], description: "Primary component type" },
+                          module_name: { type: "string", description: "Module or feature area" },
+                          effort_estimate: { type: "string", enum: ["xs", "s", "m", "l", "xl"], description: "T-shirt size effort estimate" },
                           ba_analysis: { type: "string" },
                         },
-                        required: ["title", "description", "priority", "ba_analysis"],
+                        required: ["title", "description", "priority", "sf_cloud", "component_type", "module_name", "effort_estimate", "ba_analysis"],
                         additionalProperties: false,
                       },
                     },
@@ -325,6 +329,10 @@ For each requirement include a detailed BA analysis with:
             description: r.description,
             priority: r.priority,
             workflow_status: "pending_ba_approval",
+            sf_cloud: r.sf_cloud || null,
+            component_type: r.component_type || null,
+            module_name: r.module_name || null,
+            effort_estimate: r.effort_estimate || null,
           })
           .select()
           .single();
