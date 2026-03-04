@@ -96,11 +96,50 @@ const Projects = () => {
               <DialogTrigger asChild>
                 <Button className="gap-2"><Plus className="h-4 w-4" />New Project</Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className="sm:max-w-lg">
                 <DialogHeader><DialogTitle>Create Project</DialogTitle></DialogHeader>
-                <div className="flex flex-col gap-4 pt-2">
-                  <Input placeholder="Project name" value={title} onChange={(e) => setTitle(e.target.value)} />
-                  <Textarea placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
+                <div className="flex flex-col gap-4 pt-2 max-h-[70vh] overflow-y-auto">
+                  <Input placeholder="Project name *" value={title} onChange={(e) => setTitle(e.target.value)} />
+                  <Textarea placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-muted-foreground">Salesforce Edition</label>
+                      <Select value={sfEdition} onValueChange={setSfEdition}>
+                        <SelectTrigger><SelectValue placeholder="Select edition" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="developer">Developer</SelectItem>
+                          <SelectItem value="professional">Professional</SelectItem>
+                          <SelectItem value="enterprise">Enterprise</SelectItem>
+                          <SelectItem value="unlimited">Unlimited</SelectItem>
+                          <SelectItem value="performance">Performance</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-muted-foreground">Org Type</label>
+                      <Select value={orgType} onValueChange={setOrgType}>
+                        <SelectTrigger><SelectValue placeholder="Select org type" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="production">Production</SelectItem>
+                          <SelectItem value="full_sandbox">Full Sandbox</SelectItem>
+                          <SelectItem value="partial_sandbox">Partial Sandbox</SelectItem>
+                          <SelectItem value="developer_sandbox">Developer Sandbox</SelectItem>
+                          <SelectItem value="scratch_org">Scratch Org</SelectItem>
+                          <SelectItem value="developer_org">Developer Org</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-muted-foreground">Target Go-Live</label>
+                      <Input type="date" value={targetGoLive} onChange={(e) => setTargetGoLive(e.target.value)} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-muted-foreground">Sandbox / Org URL</label>
+                      <Input placeholder="https://myorg.my.salesforce.com" value={sandboxUrl} onChange={(e) => setSandboxUrl(e.target.value)} />
+                    </div>
+                  </div>
                   <Button onClick={createProject} disabled={!title.trim() || creating}>
                     {creating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                     Create Project
