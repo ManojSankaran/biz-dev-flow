@@ -684,20 +684,80 @@ const ProjectDetail = () => {
                 <DialogTrigger asChild>
                   <Button className="gap-2 ml-3 flex-shrink-0"><Plus className="h-4 w-4" />Add</Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="sm:max-w-lg">
                   <DialogHeader><DialogTitle>New Requirement</DialogTitle></DialogHeader>
-                  <div className="flex flex-col gap-4 pt-2">
-                    <Input placeholder="Requirement title" value={reqTitle} onChange={(e) => setReqTitle(e.target.value)} />
-                    <Textarea placeholder="Description..." value={reqDesc} onChange={(e) => setReqDesc(e.target.value)} rows={3} />
-                    <Select value={reqPriority} onValueChange={(v) => setReqPriority(v as any)}>
-                      <SelectTrigger><SelectValue placeholder="Priority" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="critical">Critical</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="flex flex-col gap-4 pt-2 max-h-[70vh] overflow-y-auto">
+                    <Input placeholder="Requirement title *" value={reqTitle} onChange={(e) => setReqTitle(e.target.value)} />
+                    <Textarea placeholder="Description..." value={reqDesc} onChange={(e) => setReqDesc(e.target.value)} rows={2} />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-muted-foreground">Priority</label>
+                        <Select value={reqPriority} onValueChange={(v) => setReqPriority(v as any)}>
+                          <SelectTrigger><SelectValue placeholder="Priority" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="low">Low</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="high">High</SelectItem>
+                            <SelectItem value="critical">Critical</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-muted-foreground">Effort Estimate</label>
+                        <Select value={reqEffort} onValueChange={setReqEffort}>
+                          <SelectTrigger><SelectValue placeholder="T-shirt size" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="xs">XS — Trivial</SelectItem>
+                            <SelectItem value="s">S — Small</SelectItem>
+                            <SelectItem value="m">M — Medium</SelectItem>
+                            <SelectItem value="l">L — Large</SelectItem>
+                            <SelectItem value="xl">XL — Epic</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-muted-foreground">Salesforce Cloud</label>
+                        <Select value={reqCloud} onValueChange={setReqCloud}>
+                          <SelectTrigger><SelectValue placeholder="Select cloud" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="sales_cloud">Sales Cloud</SelectItem>
+                            <SelectItem value="service_cloud">Service Cloud</SelectItem>
+                            <SelectItem value="experience_cloud">Experience Cloud</SelectItem>
+                            <SelectItem value="marketing_cloud">Marketing Cloud</SelectItem>
+                            <SelectItem value="commerce_cloud">Commerce Cloud</SelectItem>
+                            <SelectItem value="analytics_cloud">Analytics Cloud</SelectItem>
+                            <SelectItem value="platform">Platform</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-muted-foreground">Component Type</label>
+                        <Select value={reqComponentType} onValueChange={setReqComponentType}>
+                          <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="apex_class">Apex Class</SelectItem>
+                            <SelectItem value="apex_trigger">Apex Trigger</SelectItem>
+                            <SelectItem value="lwc">Lightning Web Component</SelectItem>
+                            <SelectItem value="aura">Aura Component</SelectItem>
+                            <SelectItem value="flow">Flow</SelectItem>
+                            <SelectItem value="validation_rule">Validation Rule</SelectItem>
+                            <SelectItem value="custom_object">Custom Object</SelectItem>
+                            <SelectItem value="custom_field">Custom Field</SelectItem>
+                            <SelectItem value="integration">Integration</SelectItem>
+                            <SelectItem value="report_dashboard">Report / Dashboard</SelectItem>
+                            <SelectItem value="permission_set">Permission Set</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-muted-foreground">Module / Feature Area</label>
+                      <Input placeholder="e.g. Opportunity Management, Case Routing" value={reqModule} onChange={(e) => setReqModule(e.target.value)} />
+                    </div>
                     <Button onClick={addRequirement} disabled={!reqTitle.trim()}>Create Requirement</Button>
                   </div>
                 </DialogContent>
