@@ -41,6 +41,7 @@ interface Props {
 export function RequirementCard({ requirement, onStatusChange, onAutoProgress, onDelete, onApproval }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [approving, setApproving] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const { toast } = useToast();
 
   const overall = getOverallStatus(requirement.agents);
