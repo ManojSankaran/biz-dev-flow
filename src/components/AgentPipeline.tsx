@@ -220,9 +220,9 @@ export function AgentPipeline({ agents, requirementId, onStatusChange }: AgentPi
         </div>
       </div>
 
-      {/* Agent Output Preview Dialog */}
+      {/* Agent Output Preview/Edit Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>{AGENT_OUTPUT_LABELS[previewAgent] || previewAgent} Output</DialogTitle>
           </DialogHeader>
@@ -231,9 +231,13 @@ export function AgentPipeline({ agents, requirementId, onStatusChange }: AgentPi
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-card-foreground text-sm leading-relaxed">
-              {previewContent}
-            </div>
+            <AgentOutputEditor
+              requirementId={requirementId}
+              agentName={previewAgent}
+              initialContent={previewContent || ""}
+              outputLabel={AGENT_OUTPUT_LABELS[previewAgent] || previewAgent}
+              onSaved={() => {}}
+            />
           )}
         </DialogContent>
       </Dialog>
