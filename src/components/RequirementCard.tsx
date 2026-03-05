@@ -162,6 +162,20 @@ export function RequirementCard({ requirement, onStatusChange, onAutoProgress, o
                       size="sm"
                       variant="outline"
                       className="gap-1.5 text-xs h-7 border-primary/30 text-primary hover:bg-primary/10"
+                      onClick={(e) => { e.stopPropagation(); setDetailOpen(true); }}
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      View Details
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>View full requirement details</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 text-xs h-7 border-primary/30 text-primary hover:bg-primary/10"
                       onClick={(e) => { e.stopPropagation(); onAutoProgress(); }}
                     >
                       <Play className="h-3 w-3" />
