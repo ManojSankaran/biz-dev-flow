@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { AgentInfo, AgentStatus, APPROVAL_AGENTS, AGENT_OUTPUT_LABELS } from "@/types/requirement";
 import { StatusBadge } from "./StatusBadge";
-import { FileSearch, Blocks, Shield, Code, TestTube2, GitBranch, ChevronRight, Eye, Loader2 } from "lucide-react";
+import { AgentOutputEditor } from "./AgentOutputEditor";
+import { FileSearch, Blocks, Shield, Code, TestTube2, GitBranch, ChevronRight, Eye, Loader2, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
