@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { AgentInfo, AgentStatus, APPROVAL_AGENTS, AGENT_OUTPUT_LABELS } from "@/types/requirement";
 import { StatusBadge } from "./StatusBadge";
-import { FileSearch, Blocks, Shield, Code, TestTube2, GitBranch, ChevronRight, Eye, Loader2 } from "lucide-react";
+import { AgentOutputEditor } from "./AgentOutputEditor";
+import { FileSearch, Blocks, Shield, Code, TestTube2, GitBranch, ChevronRight, Eye, Loader2, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -119,8 +120,8 @@ export function AgentPipeline({ agents, requirementId, onStatusChange }: AgentPi
                       className="h-5 px-1.5 text-[10px] gap-1 text-primary hover:text-primary"
                       onClick={() => viewAgentOutput(agent.name)}
                     >
-                      <Eye className="h-3 w-3" />
-                      Preview
+                      {APPROVAL_AGENTS.includes(agent.name) ? <Pencil className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                      {APPROVAL_AGENTS.includes(agent.name) ? "Edit" : "Preview"}
                     </Button>
                   )}
                 </div>
@@ -188,8 +189,10 @@ export function AgentPipeline({ agents, requirementId, onStatusChange }: AgentPi
                           className="h-6 px-2 text-[10px] gap-1 border-primary/30 text-primary hover:bg-primary/10"
                           onClick={() => viewAgentOutput(agent.name)}
                         >
-                          <Eye className="h-3 w-3" />
-                          {AGENT_OUTPUT_LABELS[agent.name] || "View Output"}
+                          {APPROVAL_AGENTS.includes(agent.name) ? <Pencil className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                          {APPROVAL_AGENTS.includes(agent.name) 
+                            ? `Edit ${AGENT_OUTPUT_LABELS[agent.name] || "Output"}` 
+                            : (AGENT_OUTPUT_LABELS[agent.name] || "View Output")}
                         </Button>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
@@ -219,9 +222,9 @@ export function AgentPipeline({ agents, requirementId, onStatusChange }: AgentPi
         </div>
       </div>
 
-      {/* Agent Output Preview Dialog */}
+      {/* Agent Output Preview/Edit Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>{AGENT_OUTPUT_LABELS[previewAgent] || previewAgent} Output</DialogTitle>
           </DialogHeader>
@@ -230,9 +233,13 @@ export function AgentPipeline({ agents, requirementId, onStatusChange }: AgentPi
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-card-foreground text-sm leading-relaxed">
-              {previewContent}
-            </div>
+            <AgentOutputEditor
+              requirementId={requirementId}
+              agentName={previewAgent}
+              initialContent={previewContent || ""}
+              outputLabel={AGENT_OUTPUT_LABELS[previewAgent] || previewAgent}
+              onSaved={() => {}}
+            />
           )}
         </DialogContent>
       </Dialog>

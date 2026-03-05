@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.project-scoping-chat]
 verify_jwt = false
+
+[functions.enhance-output]
+verify_jwt = false
