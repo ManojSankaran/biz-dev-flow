@@ -386,7 +386,7 @@ export function RequirementDetailDialog({ requirement, open, onOpenChange, onSta
 
               {/* Version History Tab */}
               <TabsContent value="history" className="mt-4">
-                <RequirementVersions requirementId={requirement.id} />
+                <RequirementVersions requirementId={requirement.id} requirementTitle={dbReq?.title || requirement.title} />
               </TabsContent>
             </Tabs>
           )}
