@@ -3,8 +3,9 @@ import { Requirement, AgentStatus, APPROVAL_AGENTS } from "@/types/requirement";
 import { AgentPipeline } from "./AgentPipeline";
 import { StatusBadge } from "./StatusBadge";
 import { WorkflowStatusBadge } from "./WorkflowStatusBadge";
+import { RequirementDetailDialog } from "./RequirementDetailDialog";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronRight, AlertTriangle, ArrowUp, ArrowDown, Minus, Play, Trash2, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { ChevronRight, AlertTriangle, ArrowUp, ArrowDown, Minus, Play, Trash2, CheckCircle, XCircle, Loader2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ interface Props {
 export function RequirementCard({ requirement, onStatusChange, onAutoProgress, onDelete, onApproval }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [approving, setApproving] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const { toast } = useToast();
 
   const overall = getOverallStatus(requirement.agents);
@@ -160,6 +162,20 @@ export function RequirementCard({ requirement, onStatusChange, onAutoProgress, o
                       size="sm"
                       variant="outline"
                       className="gap-1.5 text-xs h-7 border-primary/30 text-primary hover:bg-primary/10"
+                      onClick={(e) => { e.stopPropagation(); setDetailOpen(true); }}
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      View Details
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>View full requirement details</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 text-xs h-7 border-primary/30 text-primary hover:bg-primary/10"
                       onClick={(e) => { e.stopPropagation(); onAutoProgress(); }}
                     >
                       <Play className="h-3 w-3" />
@@ -192,6 +208,14 @@ export function RequirementCard({ requirement, onStatusChange, onAutoProgress, o
           </motion.div>
         )}
       </AnimatePresence>
+
+      <RequirementDetailDialog
+        requirement={requirement}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        onStatusChange={onStatusChange}
+        onUpdated={() => onApproval?.()}
+      />
     </motion.div>
   );
 }
