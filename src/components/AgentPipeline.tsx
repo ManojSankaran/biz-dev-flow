@@ -189,8 +189,10 @@ export function AgentPipeline({ agents, requirementId, onStatusChange }: AgentPi
                           className="h-6 px-2 text-[10px] gap-1 border-primary/30 text-primary hover:bg-primary/10"
                           onClick={() => viewAgentOutput(agent.name)}
                         >
-                          <Eye className="h-3 w-3" />
-                          {AGENT_OUTPUT_LABELS[agent.name] || "View Output"}
+                          {APPROVAL_AGENTS.includes(agent.name) ? <Pencil className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                          {APPROVAL_AGENTS.includes(agent.name) 
+                            ? `Edit ${AGENT_OUTPUT_LABELS[agent.name] || "Output"}` 
+                            : (AGENT_OUTPUT_LABELS[agent.name] || "View Output")}
                         </Button>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
