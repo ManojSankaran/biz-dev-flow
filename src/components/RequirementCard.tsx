@@ -208,6 +208,14 @@ export function RequirementCard({ requirement, onStatusChange, onAutoProgress, o
           </motion.div>
         )}
       </AnimatePresence>
+
+      <RequirementDetailDialog
+        requirement={requirement}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        onStatusChange={onStatusChange}
+        onUpdated={() => onApproval?.()}
+      />
     </motion.div>
   );
 }
