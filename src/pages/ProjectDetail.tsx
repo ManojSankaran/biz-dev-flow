@@ -439,7 +439,7 @@ const ProjectDetail = () => {
       </header>
 
       <main className="container max-w-7xl mx-auto px-4 py-6">
-        <Tabs defaultValue="stakeholders" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="bg-secondary/30 border border-border p-0.5">
             <TabsTrigger value="stakeholders" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               <Users className="h-3.5 w-3.5" />Stakeholders
