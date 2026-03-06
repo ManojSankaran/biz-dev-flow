@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Requirement, AgentStatus, WorkflowStatus } from "@/types/requirement";
 import { AgentPipeline } from "./AgentPipeline";
 import { StatusBadge } from "./StatusBadge";
@@ -97,31 +97,41 @@ export function RequirementDetailDialog({ requirement, open, onOpenChange, onSta
 
   const fetchDetails = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("requirements")
-      .select("*")
-      .eq("id", requirement.id)
-      .single();
-    if (data) {
-      const d = data as any as DbRequirement;
-      setDbReq(d);
-      setEditTitle(d.title);
-      setEditDesc(d.description || "");
-      setEditPriority(d.priority);
-      setEditCloud(d.sf_cloud || "");
-      setEditComponent(d.component_type || "");
-      setEditModule(d.module_name || "");
-      setEditEffort(d.effort_estimate || "");
+    try {
+      const { data, error } = await supabase
+        .from("requirements")
+        .select("*")
+        .eq("id", requirement.id)
+        .single();
+      if (error) throw error;
+      if (data) {
+        const d = data as any as DbRequirement;
+        setDbReq(d);
+        setEditTitle(d.title);
+        setEditDesc(d.description || "");
+        setEditPriority(d.priority);
+        setEditCloud(d.sf_cloud || "");
+        setEditComponent(d.component_type || "");
+        setEditModule(d.module_name || "");
+        setEditEffort(d.effort_estimate || "");
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to load requirement", variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const handleOpen = (isOpen: boolean) => {
-    onOpenChange(isOpen);
-    if (isOpen) {
+  // Fetch details when dialog opens
+  useEffect(() => {
+    if (open) {
       fetchDetails();
       setEditing(false);
     }
+  }, [open, requirement.id]);
+
+  const handleOpen = (isOpen: boolean) => {
+    onOpenChange(isOpen);
   };
 
   const startEditing = () => {
@@ -140,28 +150,38 @@ export function RequirementDetailDialog({ requirement, open, onOpenChange, onSta
   const cancelEditing = () => setEditing(false);
 
   const saveChanges = async () => {
+    if (!editTitle.trim()) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("requirements")
-      .update({
+    try {
+      const updatePayload: Record<string, any> = {
         title: editTitle.trim(),
         description: editDesc.trim() || null,
-        priority: editPriority as any,
-        sf_cloud: editCloud || null,
-        component_type: editComponent || null,
+        priority: editPriority,
         module_name: editModule.trim() || null,
-        effort_estimate: editEffort || null,
-      } as any)
-      .eq("id", requirement.id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
+      };
+      if (editCloud) updatePayload.sf_cloud = editCloud;
+      else updatePayload.sf_cloud = null;
+      if (editComponent) updatePayload.component_type = editComponent;
+      else updatePayload.component_type = null;
+      if (editEffort) updatePayload.effort_estimate = editEffort;
+      else updatePayload.effort_estimate = null;
+
+      const { error } = await supabase
+        .from("requirements")
+        .update(updatePayload as any)
+        .eq("id", requirement.id);
+      if (error) throw error;
+
       toast({ title: "Saved", description: "Requirement updated successfully" });
       setEditing(false);
-      fetchDetails();
+      await fetchDetails();
       onUpdated();
+    } catch (err: any) {
+      console.error("Save error:", err);
+      toast({ title: "Error", description: err.message || "Failed to save changes", variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const PriorityIcon = priorityConfig[requirement.priority]?.icon || Minus;
