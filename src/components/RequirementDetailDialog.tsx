@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Requirement, AgentStatus, WorkflowStatus } from "@/types/requirement";
 import { AgentPipeline } from "./AgentPipeline";
 import { StatusBadge } from "./StatusBadge";
