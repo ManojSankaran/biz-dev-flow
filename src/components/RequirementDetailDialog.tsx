@@ -150,28 +150,38 @@ export function RequirementDetailDialog({ requirement, open, onOpenChange, onSta
   const cancelEditing = () => setEditing(false);
 
   const saveChanges = async () => {
+    if (!editTitle.trim()) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("requirements")
-      .update({
+    try {
+      const updatePayload: Record<string, any> = {
         title: editTitle.trim(),
         description: editDesc.trim() || null,
-        priority: editPriority as any,
-        sf_cloud: editCloud || null,
-        component_type: editComponent || null,
+        priority: editPriority,
         module_name: editModule.trim() || null,
-        effort_estimate: editEffort || null,
-      } as any)
-      .eq("id", requirement.id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
+      };
+      if (editCloud) updatePayload.sf_cloud = editCloud;
+      else updatePayload.sf_cloud = null;
+      if (editComponent) updatePayload.component_type = editComponent;
+      else updatePayload.component_type = null;
+      if (editEffort) updatePayload.effort_estimate = editEffort;
+      else updatePayload.effort_estimate = null;
+
+      const { error } = await supabase
+        .from("requirements")
+        .update(updatePayload as any)
+        .eq("id", requirement.id);
+      if (error) throw error;
+
       toast({ title: "Saved", description: "Requirement updated successfully" });
       setEditing(false);
-      fetchDetails();
+      await fetchDetails();
       onUpdated();
+    } catch (err: any) {
+      console.error("Save error:", err);
+      toast({ title: "Error", description: err.message || "Failed to save changes", variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const PriorityIcon = priorityConfig[requirement.priority]?.icon || Minus;
