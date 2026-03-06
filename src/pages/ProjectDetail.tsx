@@ -132,6 +132,7 @@ const ProjectDetail = () => {
 
   // Upload
   const [uploading, setUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState("stakeholders");
 
   const fetchAll = useCallback(async () => {
     if (!projectId) return;
