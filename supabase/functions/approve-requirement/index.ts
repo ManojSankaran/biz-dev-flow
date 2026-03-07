@@ -325,11 +325,43 @@ serve(async (req) => {
       await supabase.from("requirements").update({ workflow_status: "generating_design" }).eq("id", requirementId);
       await supabase.from("requirement_agents").update({ status: "completed" }).eq("requirement_id", requirementId).eq("agent_name", "Business Analyst");
 
+      const structureInfo = devopsConfig
+        ? `\nSalesforce Project Structure: ${devopsConfig.project_structure === "sfdx" ? "SFDX (force-app/main/default/)" : devopsConfig.project_structure === "mdapi" ? "MDAPI (src/)" : "Auto-detect"}
+Repository: ${devopsConfig.repo_url}
+Branch: ${devopsConfig.branch}
+Provider: ${devopsConfig.provider}`
+        : "";
+
+      const sfdxPaths = `
+Salesforce DX Folder Structure (force-app/main/default/):
+- Apex Classes: force-app/main/default/classes/
+- Apex Triggers: force-app/main/default/triggers/
+- LWC Components: force-app/main/default/lwc/
+- Aura Components: force-app/main/default/aura/
+- Custom Objects: force-app/main/default/objects/
+- Custom Fields: force-app/main/default/objects/<ObjectName>/fields/
+- Validation Rules: force-app/main/default/objects/<ObjectName>/validationRules/
+- Flows: force-app/main/default/flows/
+- Permission Sets: force-app/main/default/permissionsets/`;
+
+      const mdapiPaths = `
+Metadata API Folder Structure (src/):
+- Apex Classes: src/classes/
+- Apex Triggers: src/triggers/
+- Custom Objects: src/objects/
+- Flows: src/flows/
+- Permission Sets: src/permissionsets/`;
+
+      const folderStructure = devopsConfig?.project_structure === "mdapi" ? mdapiPaths : sfdxPaths;
+
       const designPrompt = `You are a Salesforce Technical Architect. Generate a technical design document for a Salesforce implementation.
 
 Requirement: ${req_data.title}
 Description: ${req_data.description || ""}
 Project: ${project.title}
+${structureInfo}
+
+${folderStructure}
 
 Create a comprehensive Salesforce technical design covering:
 
@@ -360,6 +392,9 @@ Create a comprehensive Salesforce technical design covering:
    - Bulkification strategy
    - SOQL query optimization
    - DML optimization
+8. **Deployment File Paths**: 
+   - For each component, specify the exact file path in the ${devopsConfig?.project_structure === "mdapi" ? "MDAPI" : "SFDX"} project structure
+   - Align all paths with the configured folder structure above
 
 Format as clean markdown with proper sections.`;
 
