@@ -41,6 +41,20 @@ serve(async (req) => {
       .single();
     if (!project) throw new Error("Access denied");
 
+    // Fetch DevOps config for context
+    const { data: devopsConfig } = await supabase
+      .from("project_devops_config")
+      .select("*")
+      .eq("project_id", req_data.project_id)
+      .maybeSingle();
+
+    const devopsContext = devopsConfig
+      ? `\nProject Structure: ${devopsConfig.project_structure === "sfdx" ? "SFDX (force-app/main/default/)" : "MDAPI (src/)"}
+Repository: ${devopsConfig.repo_url}
+Branch: ${devopsConfig.branch}
+Provider: ${devopsConfig.provider}`
+      : "";
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
@@ -62,9 +76,11 @@ Description: ${req_data.description || "N/A"}
 SF Cloud: ${req_data.sf_cloud || "N/A"}
 Component: ${req_data.component_type || "N/A"}
 Module: ${req_data.module_name || "N/A"}
+${devopsContext}
 
 The current technical design document is provided. Help the user enhance, refine, or modify it based on their feedback.
 When providing an updated document, format it in clean markdown with architecture decisions, component designs, data model changes, and implementation approach.
+Ensure all file paths align with the ${devopsConfig?.project_structure === "mdapi" ? "MDAPI" : "SFDX"} project structure.
 Always respond conversationally first, then if changes are needed, provide the FULL updated document wrapped in <updated_document> tags.`;
 
     const messages: any[] = [
