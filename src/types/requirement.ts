@@ -44,6 +44,7 @@ export interface Requirement {
   createdAt: string;
   agents: AgentInfo[];
   workflowStatus: WorkflowStatus;
+  dependsOn: string[];
 }
 
 // New agent order: BA → Architect → Developer → Admin → QA → DevOps

@@ -803,6 +803,14 @@ const ProjectDetail = () => {
             )}
           </TabsContent>
 
+          {/* Dependencies Tab */}
+          <TabsContent value="dependencies" className="mt-4">
+            <div className="rounded-xl border bg-card p-5">
+              <h3 className="text-sm font-semibold text-card-foreground mb-4">Dependency Graph & Impact Analysis</h3>
+              <DependencyGraph requirements={requirements} />
+            </div>
+          </TabsContent>
+
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="mt-4">
             {projectId && <ProjectActivityDashboard projectId={projectId} requirements={requirements} />}
