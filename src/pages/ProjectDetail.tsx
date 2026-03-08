@@ -189,6 +189,7 @@ const ProjectDetail = () => {
         priority: r.priority as Requirement["priority"],
         createdAt: r.created_at.split("T")[0],
         workflowStatus: (r.workflow_status || "pending_ba_approval") as WorkflowStatus,
+        dependsOn: r.depends_on || [],
         agents: (agentsByReq.get(r.id) || [])
           .slice()
           .sort((a, b) => {
