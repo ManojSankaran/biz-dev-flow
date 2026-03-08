@@ -46,6 +46,7 @@ const INITIAL: Requirement[] = [
     priority: "high",
     createdAt: "2026-02-22",
     workflowStatus: "completed",
+    dependsOn: [],
     agents: AGENT_TEMPLATES.map((t, i) => ({
       ...t,
       id: createId(),
