@@ -17,8 +17,9 @@ import { SearchFilterBar, PriorityFilter, StatusFilter, SortOption } from "@/com
 import { NotificationBell } from "@/components/NotificationBell";
 import {
   Activity, ArrowLeft, Users, FileUp, LayoutList, BarChart3, Plus, Loader2, Trash2,
-  Upload, File, Image, FileText, Sparkles, UserPlus, GitBranch, Save, Pencil, MessageSquare, Shield, History
+  Upload, File, Image, FileText, Sparkles, UserPlus, GitBranch, Save, Pencil, MessageSquare, Shield, History, Link2
 } from "lucide-react";
+import { DependencyGraph } from "@/components/DependencyGraph";
 import { ProjectScopingChat } from "@/components/ProjectScopingChat";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -67,6 +68,7 @@ interface DbRequirement {
   priority: string;
   created_at: string;
   workflow_status: string;
+  depends_on: string[] | null;
 }
 
 interface DbAgent {
@@ -188,6 +190,7 @@ const ProjectDetail = () => {
         priority: r.priority as Requirement["priority"],
         createdAt: r.created_at.split("T")[0],
         workflowStatus: (r.workflow_status || "pending_ba_approval") as WorkflowStatus,
+        dependsOn: r.depends_on || [],
         agents: (agentsByReq.get(r.id) || [])
           .slice()
           .sort((a, b) => {
@@ -458,6 +461,9 @@ const ProjectDetail = () => {
             <TabsTrigger value="requirements" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               <LayoutList className="h-3.5 w-3.5" />Requirements
               {requirements.length > 0 && <span className="ml-1 h-4 min-w-4 rounded-full bg-primary/20 text-primary text-[10px] font-mono flex items-center justify-center px-1">{requirements.length}</span>}
+            </TabsTrigger>
+            <TabsTrigger value="dependencies" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              <Link2 className="h-3.5 w-3.5" />Dependencies
             </TabsTrigger>
             <TabsTrigger value="governance" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               <Shield className="h-3.5 w-3.5" />Governance
@@ -796,6 +802,14 @@ const ProjectDetail = () => {
                 <AuditLog projectId={projectId} />
               </>
             )}
+          </TabsContent>
+
+          {/* Dependencies Tab */}
+          <TabsContent value="dependencies" className="mt-4">
+            <div className="rounded-xl border bg-card p-5">
+              <h3 className="text-sm font-semibold text-card-foreground mb-4">Dependency Graph & Impact Analysis</h3>
+              <DependencyGraph requirements={requirements} />
+            </div>
           </TabsContent>
 
           {/* Analytics Tab */}

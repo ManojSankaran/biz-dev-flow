@@ -18,6 +18,7 @@ const INITIAL: Requirement[] = [
     priority: "critical",
     createdAt: "2026-02-20",
     workflowStatus: "in_development",
+    dependsOn: [],
     agents: AGENT_TEMPLATES.map((t, i) => ({
       ...t,
       id: createId(),
@@ -31,6 +32,7 @@ const INITIAL: Requirement[] = [
     priority: "high",
     createdAt: "2026-02-21",
     workflowStatus: "pending_architect_approval",
+    dependsOn: [],
     agents: AGENT_TEMPLATES.map((t, i) => ({
       ...t,
       id: createId(),
@@ -44,6 +46,7 @@ const INITIAL: Requirement[] = [
     priority: "high",
     createdAt: "2026-02-22",
     workflowStatus: "completed",
+    dependsOn: [],
     agents: AGENT_TEMPLATES.map((t, i) => ({
       ...t,
       id: createId(),
@@ -57,6 +60,7 @@ const INITIAL: Requirement[] = [
     priority: "medium",
     createdAt: "2026-02-23",
     workflowStatus: "pending_ba_approval",
+    dependsOn: [],
     agents: createAgents(),
   },
   {
@@ -66,6 +70,7 @@ const INITIAL: Requirement[] = [
     priority: "low",
     createdAt: "2026-02-19",
     workflowStatus: "in_development",
+    dependsOn: [],
     agents: AGENT_TEMPLATES.map((t, i) => ({
       ...t,
       id: createId(),
@@ -107,6 +112,7 @@ export function useRequirements() {
           priority,
           createdAt: new Date().toISOString().split("T")[0],
           workflowStatus: "pending_ba_approval",
+          dependsOn: [],
           agents: createAgents(),
         },
         ...prev,
