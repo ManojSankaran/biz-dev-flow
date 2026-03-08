@@ -461,6 +461,9 @@ const ProjectDetail = () => {
               <LayoutList className="h-3.5 w-3.5" />Requirements
               {requirements.length > 0 && <span className="ml-1 h-4 min-w-4 rounded-full bg-primary/20 text-primary text-[10px] font-mono flex items-center justify-center px-1">{requirements.length}</span>}
             </TabsTrigger>
+            <TabsTrigger value="dependencies" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              <Link2 className="h-3.5 w-3.5" />Dependencies
+            </TabsTrigger>
             <TabsTrigger value="governance" className="gap-1.5 text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               <Shield className="h-3.5 w-3.5" />Governance
             </TabsTrigger>
