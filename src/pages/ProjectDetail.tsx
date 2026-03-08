@@ -67,6 +67,7 @@ interface DbRequirement {
   priority: string;
   created_at: string;
   workflow_status: string;
+  depends_on: string[] | null;
 }
 
 interface DbAgent {
