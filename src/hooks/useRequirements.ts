@@ -60,6 +60,7 @@ const INITIAL: Requirement[] = [
     priority: "medium",
     createdAt: "2026-02-23",
     workflowStatus: "pending_ba_approval",
+    dependsOn: [],
     agents: createAgents(),
   },
   {
