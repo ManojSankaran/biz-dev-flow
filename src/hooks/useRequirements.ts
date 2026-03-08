@@ -108,6 +108,7 @@ export function useRequirements() {
           priority,
           createdAt: new Date().toISOString().split("T")[0],
           workflowStatus: "pending_ba_approval",
+          dependsOn: [],
           agents: createAgents(),
         },
         ...prev,

@@ -17,8 +17,9 @@ import { SearchFilterBar, PriorityFilter, StatusFilter, SortOption } from "@/com
 import { NotificationBell } from "@/components/NotificationBell";
 import {
   Activity, ArrowLeft, Users, FileUp, LayoutList, BarChart3, Plus, Loader2, Trash2,
-  Upload, File, Image, FileText, Sparkles, UserPlus, GitBranch, Save, Pencil, MessageSquare, Shield, History
+  Upload, File, Image, FileText, Sparkles, UserPlus, GitBranch, Save, Pencil, MessageSquare, Shield, History, Link2
 } from "lucide-react";
+import { DependencyGraph } from "@/components/DependencyGraph";
 import { ProjectScopingChat } from "@/components/ProjectScopingChat";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
